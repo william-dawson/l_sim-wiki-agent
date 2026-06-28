@@ -1,0 +1,14 @@
+{
+  "name": "wiki-marketplace",
+  "owner": {
+    "name": "William Dawson",
+    "email": "william.dawson@riken.jp"
+  },
+  "plugins": [
+    {
+      "name": "wiki",
+      "source": "./plugins/wiki",
+      "description": "Lab wiki — semantic search, read, and write shared knowledge pages."
+    }
+  ]
+}
