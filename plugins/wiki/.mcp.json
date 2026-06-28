@@ -7,7 +7,7 @@
         "run",
         "--quiet",
         "--from",
-        "git+https://github.com/wddawson/wiki-agent.git@main#subdirectory=server",
+        "git+https://github.com/william-dawson/l_sim-wiki-agent.git@main#subdirectory=server",
         "wiki-mcp"
       ],
       "env": {
