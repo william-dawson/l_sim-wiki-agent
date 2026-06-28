@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 wiki-mcp = "wiki_mcp.server:main"
+wiki-reindex = "wiki_mcp.reindex:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/wiki_mcp"]
