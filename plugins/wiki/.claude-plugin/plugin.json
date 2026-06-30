@@ -1,7 +1,7 @@
 {
   "name": "wiki",
   "description": "Search, read, and write the lab wiki. Agents use this to look up prior knowledge and record new findings.",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "author": {
     "name": "William Dawson",
     "email": "william.dawson@riken.jp"

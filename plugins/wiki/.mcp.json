@@ -9,10 +9,7 @@
         "--from",
         "git+https://github.com/william-dawson/l_sim-wiki-agent.git@main#subdirectory=server",
         "wiki-mcp"
-      ],
-      "env": {
-        "GITLAB_PROJECT": "wddawson/l_sim-agent-wiki"
-      }
+      ]
     }
   }
 }

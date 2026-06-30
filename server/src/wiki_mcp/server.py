@@ -17,8 +17,7 @@ import yaml
 from fastembed import TextEmbedding
 from mcp.server.fastmcp import FastMCP
 
-GITLAB_PROJECT = os.environ.get("GITLAB_PROJECT", "wddawson/l_sim-agent-wiki")
-GITLAB_REMOTE = os.environ.get("WIKI_REMOTE", f"git@gitlab.com:{GITLAB_PROJECT}.git")
+WIKI_REMOTE = os.environ.get("WIKI_REMOTE", "git@gitlab.com:wddawson/l_sim-agent-wiki.git")
 CACHE_DIR = Path(os.environ.get("WIKI_CACHE_DIR", Path.home() / ".cache" / "wiki-mcp"))
 REPO_DIR = CACHE_DIR / "repo"
 DB_PATH = REPO_DIR / "embeddings.db"
@@ -40,9 +39,9 @@ def _docs_path(path: str) -> Path:
 def _sync_repo() -> None:
     if not REPO_DIR.exists():
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["git", "clone", "--depth=1", GITLAB_REMOTE, str(REPO_DIR)], check=True)
+        subprocess.run(["git", "clone", "--depth=1", WIKI_REMOTE, str(REPO_DIR)], check=True)
     else:
-        subprocess.run(["git", "remote", "set-url", "origin", GITLAB_REMOTE], cwd=REPO_DIR, check=True)
+        subprocess.run(["git", "remote", "set-url", "origin", WIKI_REMOTE], cwd=REPO_DIR, check=True)
         subprocess.run(["git", "pull", "--ff-only"], cwd=REPO_DIR, check=True)
 
 
