@@ -11,7 +11,6 @@
         "wiki-mcp"
       ],
       "env": {
-        "GITLAB_TOKEN": "${GITLAB_TOKEN}",
         "GITLAB_PROJECT": "wddawson/l_sim-agent-wiki"
       }
     }

@@ -17,8 +17,8 @@ import yaml
 from fastembed import TextEmbedding
 from mcp.server.fastmcp import FastMCP
 
-GITLAB_TOKEN = os.environ["GITLAB_TOKEN"]
 GITLAB_PROJECT = os.environ.get("GITLAB_PROJECT", "wddawson/l_sim-agent-wiki")
+GITLAB_REMOTE = os.environ.get("WIKI_REMOTE", f"git@gitlab.com:{GITLAB_PROJECT}.git")
 CACHE_DIR = Path(os.environ.get("WIKI_CACHE_DIR", Path.home() / ".cache" / "wiki-mcp"))
 REPO_DIR = CACHE_DIR / "repo"
 DB_PATH = REPO_DIR / "embeddings.db"
@@ -38,11 +38,11 @@ def _docs_path(path: str) -> Path:
 
 
 def _sync_repo() -> None:
-    remote = f"https://ci-token:{GITLAB_TOKEN}@gitlab.com/{GITLAB_PROJECT}.git"
     if not REPO_DIR.exists():
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        subprocess.run(["git", "clone", "--depth=1", remote, str(REPO_DIR)], check=True)
+        subprocess.run(["git", "clone", "--depth=1", GITLAB_REMOTE, str(REPO_DIR)], check=True)
     else:
+        subprocess.run(["git", "remote", "set-url", "origin", GITLAB_REMOTE], cwd=REPO_DIR, check=True)
         subprocess.run(["git", "pull", "--ff-only"], cwd=REPO_DIR, check=True)
 
 
@@ -177,8 +177,7 @@ def write_page(path: str, content: str, commit_message: str) -> str:
         diff.check_returncode()
     subprocess.run(["git", "commit", "-m", commit_message], cwd=REPO_DIR, check=True)
 
-    remote = f"https://ci-token:{GITLAB_TOKEN}@gitlab.com/{GITLAB_PROJECT}.git"
-    subprocess.run(["git", "push", remote, "main"], cwd=REPO_DIR, check=True)
+    subprocess.run(["git", "push", "origin", "main"], cwd=REPO_DIR, check=True)
 
     return f"Written and pushed: {path} (CI will update embeddings)"
 
