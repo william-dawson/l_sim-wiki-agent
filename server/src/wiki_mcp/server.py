@@ -29,6 +29,14 @@ mcp = FastMCP("wiki")
 _embedder: TextEmbedding | None = None
 
 
+def _docs_path(path: str) -> Path:
+    full = (REPO_DIR / "docs" / path).resolve()
+    docs_root = (REPO_DIR / "docs").resolve()
+    if docs_root not in full.parents and full != docs_root:
+        raise ValueError(f"Path must stay under docs/: {path}")
+    return full
+
+
 def _sync_repo() -> None:
     remote = f"https://ci-token:{GITLAB_TOKEN}@gitlab.com/{GITLAB_PROJECT}.git"
     if not REPO_DIR.exists():
@@ -50,6 +58,10 @@ def _embed(texts: list[str]) -> list[list[float]]:
 
 
 def _db() -> sqlite3.Connection:
+    if not DB_PATH.exists():
+        raise FileNotFoundError(
+            f"{DB_PATH} does not exist. Run wiki-reindex in the wiki repo and commit embeddings.db."
+        )
     conn = sqlite3.connect(DB_PATH)
     conn.enable_load_extension(True)
     sqlite_vec.load(conn)
@@ -93,7 +105,10 @@ def search_wiki(query: str, n_results: int = 5) -> str:
 @mcp.tool()
 def read_page(path: str) -> str:
     """Read a wiki page. path is relative to docs/, e.g. 'hpc/index.md'."""
-    full = REPO_DIR / "docs" / path
+    try:
+        full = _docs_path(path)
+    except ValueError as exc:
+        return str(exc)
     if not full.exists():
         return f"Page not found: {path}"
     return full.read_text()
@@ -147,11 +162,19 @@ def write_page(path: str, content: str, commit_message: str) -> str:
     path: relative to docs/, e.g. 'hpc/slurm-tips.md'
     commit_message: must include task, agent_id, and confidence fields.
     """
-    full = REPO_DIR / "docs" / path
+    try:
+        full = _docs_path(path)
+    except ValueError as exc:
+        return str(exc)
     full.parent.mkdir(parents=True, exist_ok=True)
     full.write_text(content)
 
     subprocess.run(["git", "add", f"docs/{path}"], cwd=REPO_DIR, check=True)
+    diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=REPO_DIR)
+    if diff.returncode == 0:
+        return f"No changes to write: {path}"
+    if diff.returncode != 1:
+        diff.check_returncode()
     subprocess.run(["git", "commit", "-m", commit_message], cwd=REPO_DIR, check=True)
 
     remote = f"https://ci-token:{GITLAB_TOKEN}@gitlab.com/{GITLAB_PROJECT}.git"

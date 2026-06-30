@@ -42,8 +42,10 @@ def get_db() -> sqlite3.Connection:
 
 def split_sections(rel_path: str, content: str) -> list[dict]:
     sections, current_heading, current_lines = [], "intro", []
+    saw_heading = False
     for line in content.splitlines():
         if line.startswith("#"):
+            saw_heading = True
             if current_lines:
                 text = "\n".join(current_lines).strip()
                 if text:
@@ -56,6 +58,8 @@ def split_sections(rel_path: str, content: str) -> list[dict]:
         text = "\n".join(current_lines).strip()
         if text:
             sections.append({"heading": current_heading, "text": text})
+    if not sections and saw_heading:
+        sections.append({"heading": current_heading, "text": current_heading})
     return sections
 
 
